@@ -1,0 +1,34 @@
+{
+    "name": "t-tomek/laravel-elasticsearch",
+    "description": "A ElasticSearch based Eloquent model and Query builder for Laravel",
+    "type": "library",
+    "keywords": ["laravel","eloquent","elasticsearch","esk","database","model"],
+    "authors": [
+        {
+            "name": "Tomasz Tokarski"
+        }
+    ],
+    "license" : "MIT",
+    "require": {
+        "illuminate/support": "^5.4",
+        "illuminate/container": "^5.4",
+        "illuminate/database": "^5.4",
+        "illuminate/events": "^5.4",
+        "ruflin/elastica": "^6.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Talkareski\\ElasticSearch": "src"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Talkareski\\ElasticSearch\\ElasticSearchServiceProvider"
+            ]
+        }
+    }
+} 
