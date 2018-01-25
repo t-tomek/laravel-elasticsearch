@@ -5,15 +5,16 @@ namespace T2\ElasticLaravel\Query;
 use Elasticsearch\Client;
 use Elasticsearch\ClientBuilder;
 use Illuminate\Support\Str;
+use Illuminate\Database\ConnectionInterface;
 
 class Builder
 {
     /**
-     * The ElasticSeatch client instance.
+     * The database connection instance.
      *
-     * @var Client
+     * @var \Illuminate\Database\Connection
      */
-    public $client;
+    public $connection;
 
     /**
      * The query grammar instance.
@@ -99,13 +100,13 @@ class Builder
     /**
      * Create a new query builder instance.
      *
-     * @param Client|null
+     * @param ConnectionInterface
      * @param Grammar|null
      * @param Processor|null
      */
-    public function __construct(Client $client = null, Grammar $grammar = null, Processor $processor = null)
+    public function __construct(ConnectionInterface $connection, Grammar $grammar = null, Processor $processor = null)
     {
-        $this->client = $client ?: \Elasticsearch\ClientBuilder::create()->build();
+        $this->connection = $connection;
         $this->grammar = $grammar ?: new Grammar();
         $this->processor = $processor ?: new Processor();
     }
@@ -464,7 +465,7 @@ class Builder
      */
     protected function runSearch()
     {
-        return $this->client->search($this->toDsl());
+        return $this->connection->search($this->toDsl());
     }
 
     /**
@@ -512,7 +513,7 @@ class Builder
      */
     protected function runCount()
     {
-        return $this->client->count(
+        return $this->connection->count(
             $this->cloneWithout(['offset', 'limit', 'orders', 'columns', 'columns_exclude'])->toDsl()
         );
     }
@@ -530,11 +531,11 @@ class Builder
     /**
      * Get the database connection instance.
      *
-     * @return \Elasticsearch\Client
+     * @return \Illuminate\Database\ConnectionInterface
      */
-    public function getClient()
+    public function getConnection()
     {
-        return $this->client;
+        return $this->connection;
     }
 
     /**

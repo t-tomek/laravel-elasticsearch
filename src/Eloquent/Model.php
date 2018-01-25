@@ -5,12 +5,13 @@ namespace T2\ElasticLaravel\Eloquent;
 use Exception;
 use ArrayAccess;
 use JsonSerializable;
+use Illuminate\Support\Collection;
 use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Routing\UrlRoutable;
 use Illuminate\Contracts\Queue\QueueableEntity;
-use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\MassAssignmentException;
+use Illuminate\Database\ConnectionResolverInterface as Resolver;
 use T2\ElasticLaravel\Eloquent\Builder;
 use T2\ElasticLaravel\Query\Builder as QueryBuilder;
 
@@ -21,6 +22,11 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
         \Illuminate\Database\Eloquent\Concerns\HidesAttributes,
         \Illuminate\Database\Eloquent\Concerns\GuardsAttributes;
 
+    /**
+     * The connection name for the model.
+     *
+     * @var string
+     */
     protected $connection;
 
     /**
@@ -71,6 +77,13 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
      * @var bool
      */
     public $wasRecentlyCreated = false;
+
+   /**
+     * The connection resolver instance.
+     *
+     * @var \Illuminate\Database\ConnectionResolverInterface
+     */
+    protected static $resolver;
 
     /**
      * The loaded relationships for the model.
@@ -210,21 +223,27 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
 
         $model->exists = $exists;
 
+        $model->setConnection(
+            $this->getConnectionName()
+        );
+
         return $model;
     }
 
-        /**
+    /**
      * Create a new model instance that is existing.
      *
      * @param  array  $attributes
      * @param  string|null  $connection
      * @return static
      */
-    public function newFromBuilder($attributes = [])
+    public function newFromBuilder($attributes = [], $connection = null)
     {
         $model = $this->newInstance([], true);
 
         $model->setRawAttributes((array) $attributes, true);
+
+        $model->setConnection($connection ?: $this->getConnectionName());
 
         return $model;
     }
@@ -256,7 +275,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     /**
      * Begin querying the model.
      *
-     * @return \Elastica\QueryBuilder
+     * @return \T2\Elasticlaravel\Query\Builder
      */
     public static function query()
     {
@@ -266,7 +285,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     /**
      * Get a new query builder for the model's table.
      *
-     * @return \Elastica\QueryBuilder
+     * @return \T2\Elasticlaravel\Query\Builder
      */
     public function newQuery()
     {
@@ -322,8 +341,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     {
         $connection = $this->getConnection();
 
-
-        return (new QueryBuilder())->from($this->getIndex(), $this->getType());
+        return (new QueryBuilder($connection))->from($this->getIndex(), $this->getType());
     }
 
     /**
@@ -423,20 +441,79 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
         return ! $this->is($model);
     }
 
-    public function setConnection($connection)
+    /**
+     * Get the database connection for the model.
+     *
+     * @return \Illuminate\Database\Connection
+     */
+    public function getConnection()
     {
-        $this->connection = $connection;
+        return static::resolveConnection($this->getConnectionName());
+    }
+
+    /**
+     * Get the current connection name for the model.
+     *
+     * @return string
+     */
+    public function getConnectionName()
+    {
+        return $this->connection;
+    }
+
+    /**
+     * Set the connection associated with the model.
+     *
+     * @param  string  $name
+     * @return $this
+     */
+    public function setConnection($name)
+    {
+        $this->connection = $name;
 
         return $this;
     }
 
-    public function getConnection()
+    /**
+     * Resolve a connection instance.
+     *
+     * @param  string|null  $connection
+     * @return \Illuminate\Database\Connection
+     */
+    public static function resolveConnection($connection = null)
     {
-        if (!$this->connection) {
-            $this->connection = app()->make(\Elasticsearch\Client::class);
-        }
+        return static::$resolver->connection($connection);
+    }
 
-        return $this->connection;
+    /**
+     * Get the connection resolver instance.
+     *
+     * @return \Illuminate\Database\ConnectionResolverInterface
+     */
+    public static function getConnectionResolver()
+    {
+        return static::$resolver;
+    }
+
+    /**
+     * Set the connection resolver instance.
+     *
+     * @param  \Illuminate\Database\ConnectionResolverInterface  $resolver
+     * @return void
+     */
+    public static function setConnectionResolver(Resolver $resolver)
+    {
+        static::$resolver = $resolver;
+    }
+
+    /**
+     * Unset the connection resolver for models.
+     *
+     * @return void
+     */
+    public static function unsetConnectionResolver()
+    {
+        static::$resolver = null;
     }
 
     /**

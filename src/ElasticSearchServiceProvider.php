@@ -2,18 +2,18 @@
 
 namespace T2\ElasticLaravel;
 
-use Elasticsearch\Client;
-use Elasticsearch\ClientBuilder;
+use T2\ElasticLaravel\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 
 class ElasticSearchServiceProvider extends ServiceProvider
 {
     /**
-     * Indicates if loading of the provider is deferred.
-     *
-     * @var bool
+     * Bootstrap the application events.
      */
-    protected $defer = true;
+    public function boot()
+    {
+        Model::setConnectionResolver($this->app['db']);
+    }
 
     /**
      * Register the application services.
@@ -22,18 +22,11 @@ class ElasticSearchServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton(Client::class, function ($app) {
-            return ClientBuilder::fromConfig($app['config']->get('services.elastic'));
+        $this->app->resolving('db', function ($db) {
+            $db->extend('elasticsearch', function ($config, $name) {
+                $config['name'] = $name;
+                return new Connection($config);
+            });
         });
-    }
-
-    /**
-     * Get the services provided by the provider.
-     *
-     * @return array
-     */
-    public function provides()
-    {
-        return [Client::class];
     }
 }

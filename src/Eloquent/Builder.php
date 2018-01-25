@@ -26,7 +26,7 @@ class Builder
      */
     protected $passthru = [
         'toDsl',
-        'count',
+        'count', 'getConnection',
     ];
 
     /**
@@ -319,11 +319,13 @@ class Builder
      * Create a new instance of the model being queried.
      *
      * @param  array  $attributes
-     * @return Model
+     * @return \T2\ElsaticLaravel\Eloquent\Model
      */
     public function newModelInstance($attributes = [])
     {
-        return $this->model->newInstance($attributes);
+        return $this->model->newInstance($attributes)->setConnection(
+            $this->query->getConnection()->getName()
+        );
     }
 
     /**
