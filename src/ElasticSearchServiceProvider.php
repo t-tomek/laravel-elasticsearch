@@ -2,7 +2,8 @@
 
 namespace T2\ElasticLaravel;
 
-use Elastica\Client;
+use Elasticsearch\Client;
+use Elasticsearch\ClientBuilder;
 use Illuminate\Support\ServiceProvider;
 
 class ElasticSearchServiceProvider extends ServiceProvider
@@ -22,7 +23,7 @@ class ElasticSearchServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton(Client::class, function ($app) {
-            return new Client($app['config']->get('services.elastic'));
+            return ClientBuilder::fromConfig($app['config']->get('services.elastic'));
         });
     }
 

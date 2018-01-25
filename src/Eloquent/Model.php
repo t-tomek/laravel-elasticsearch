@@ -433,7 +433,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     public function getConnection()
     {
         if (!$this->connection) {
-            $this->connection = app()->make(\Elastica\Client::class);
+            $this->connection = app()->make(\Elasticsearch\Client::class);
         }
 
         return $this->connection;
