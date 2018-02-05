@@ -2,6 +2,7 @@
     "name": "t-tomek/laravel-elasticsearch",
     "description": "A ElasticSearch based Eloquent model and Query builder for Laravel",
     "type": "library",
+    "version": "dev-master",
     "keywords": ["laravel","eloquent","elasticsearch","esk","database","model"],
     "authors": [
         {
