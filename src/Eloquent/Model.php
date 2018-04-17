@@ -635,6 +635,26 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     }
 
     /**
+     * Get the relationships for the entity.
+     *
+     * @return array
+     */
+    public function getQueueableRelations()
+    {
+        return [];
+    }
+
+    /**
+     * Get the connection of the entity.
+     *
+     * @return string|null
+     */
+    public function getQueueableConnection()
+    {
+        return $this->getConnectionName();
+    }
+
+    /**
      * Get the value of the model's route key.
      *
      * @return mixed
@@ -652,6 +672,17 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     public function getRouteKeyName()
     {
         return $this->getKeyName();
+    }
+
+    /**
+     * Retrieve the model for a bound value.
+     *
+     * @param  mixed  $value
+     * @return \Illuminate\Database\Eloquent\Model|null
+     */
+    public function resolveRouteBinding($value)
+    {
+        return $this->where($this->getRouteKeyName(), $value)->first();
     }
 
     /**

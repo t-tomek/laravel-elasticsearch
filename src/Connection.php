@@ -113,9 +113,10 @@ class Connection extends BaseConnection
      *
      * @param  string  $query
      * @param  array   $bindings
+     * @param  bool    $useReadPdo
      * @return mixed
      */
-    public function selectOne($query, $bindings = [])
+    public function selectOne($query, $bindings = [], $useReadPdo = true)
     {
         throw new \Exception('Not supported');
     }
@@ -125,9 +126,10 @@ class Connection extends BaseConnection
      *
      * @param  string  $query
      * @param  array   $bindings
+     * @param  bool    $useReadPdo
      * @return array
      */
-    public function select($query, $bindings = [])
+    public function select($query, $bindings = [], $useReadPdo = true)
     {
         throw new \Exception('Not supported');
     }
@@ -250,10 +252,11 @@ class Connection extends BaseConnection
 
     /**
      * Rollback the active database transaction.
+     * @param  int|null $toLevel
      *
      * @return void
      */
-    public function rollBack()
+    public function rollBack($toLevel = null)
     {
         throw new \Exception('Not supported');
     }
